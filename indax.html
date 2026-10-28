@@ -1,13 +1,126 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SNs-Security0.1</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171329">
+  <title>SNs-security0.1</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(145deg, #100d20, #39216b);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 390px;
+      padding: 30px 22px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      background: #8b5cf6;
+      font-size: 36px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 27px;
+      overflow-wrap: anywhere;
+    }
+
+    .version {
+      color: #c4b5fd;
+      font-size: 14px;
+    }
+
+    .description {
+      margin: 22px 0;
+      color: #e5e1f5;
+      line-height: 1.8;
+    }
+
+    .status {
+      margin: 20px 0;
+      padding: 13px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.17);
+      color: #ddd6fe;
+      font-size: 14px;
+    }
+
+    .start {
+      width: 100%;
+      padding: 15px;
+      border: 0;
+      border-radius: 12px;
+      background: #a78bfa;
+      color: #171329;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .start:active {
+      transform: scale(0.98);
+    }
+
+    .note {
+      margin: 20px 0 0;
+      color: #c4c0d6;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+  </style>
 </head>
-<body style="background:#171329;color:white;text-align:center;font-family:Arial;padding:40px 10px">
-<h1>SNs-Security</h1>
-<p>आपकी निजी फोटो और वीडियो की सुरक्षा</p>
-<p>सुरक्षित लॉगिन जल्द शुरू होगा</p>
+
+<body>
+  <main class="app">
+    <div class="logo" aria-hidden="true">🔐</div>
+
+    <h1>SNs-security0.1</h1>
+    <div class="version">Private Security App</div>
+
+    <p class="description">
+      आपकी निजी फोटो और वीडियो के लिए
+      एक सुरक्षित वॉल्ट बनाने की शुरुआत।
+    </p>
+
+    <div class="status">
+      शुरुआती डिज़ाइन तैयार है
+    </div>
+
+    <button class="start" onclick="alert('मोबाइल OTP लॉगिन अभी जोड़ा जाना बाकी है।')">
+      शुरू करें
+    </button>
+
+    <p class="note">
+      अगला चरण: मोबाइल OTP लॉगिन, PIN सुरक्षा,
+      रिकवरी और निजी फोटो-वीडियो वॉल्ट।
+    </p>
+  </main>
 </body>
 </html>
