@@ -220,6 +220,7 @@ document.getElementById("verifyOtp").addEventListener("click", async () => {
 
   try {
     const result = await confirmationResult.confirm(code);
+    alert("Verify button chal raha hai");
   document.body.innerHTML = `
 <div style="background:#160d25;color:white;min-height:100vh;text-align:center;padding:30px">
   <h1>SNs Security</h1>
