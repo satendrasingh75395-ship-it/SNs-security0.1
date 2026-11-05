@@ -146,7 +146,18 @@ async function savePin(){
   await setDoc(doc(db,"users",user.uid),{
    pinSalt:saltText,pinHash:hashText
   },{merge:true});
-  msg.textContent="PIN सुरक्षित रूप से सेव हो गया!";
+  document.getElementById("app").innerHTML = `
+<div style="background:#281344;color:white;min-height:100vh;padding:30px;text-align:center">
+<h1>🔐 SNs Security</h1>
+<h2>Dashboard</h2>
+<p>PIN सुरक्षित रूप से सेव हो गया!</p>
+<button disabled>📷 Photo Vault — जल्द आ रहा है</button>
+<br><br>
+<button disabled>🎥 Video Vault — जल्द आ रहा है</button>
+<br><br>
+<button disabled>🔑 PIN Recovery — जल्द आ रहा है</button>
+</div>
+`;
  }catch(e){
   console.error(e);
   msg.textContent="PIN Error: "+e.code+" "+e.message;
