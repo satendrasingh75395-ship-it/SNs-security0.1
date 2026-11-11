@@ -146,7 +146,7 @@ async function savePin(){
   await setDoc(doc(db,"users",user.uid),{
    pinSalt:saltText,pinHash:hashText
   },{merge:true});
-  document.getElementById("app").innerHTML = `
+  document.body.innerHTML = `
 <div style="background:#281344;color:white;min-height:100vh;padding:30px;text-align:center">
 <h1>🔐 SNs Security</h1>
 <h2>Dashboard</h2>
