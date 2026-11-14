@@ -146,18 +146,181 @@ async function savePin(){
   await setDoc(doc(db,"users",user.uid),{
    pinSalt:saltText,pinHash:hashText
   },{merge:true});
-  document.body.innerHTML = `
-<div style="background:#281344;color:white;min-height:100vh;padding:30px;text-align:center">
+  
+document.body.innerHTML = `
+<div style="background:#281344;color:white;min-height:100vh;padding:22px;text-align:center;font-family:Arial">
 <h1>🔐 SNs Security</h1>
 <h2>Dashboard</h2>
-<p>PIN सुरक्षित रूप से सेव हो गया!</p>
-<button disabled>📷 Photo Vault — जल्द आ रहा है</button>
-<br><br>
-<button disabled>🎥 Video Vault — जल्द आ रहा है</button>
-<br><br>
-<button disabled>🔑 PIN Recovery — जल्द आ रहा है</button>
+<p>आपका PIN सुरक्षित है।</p>
+
+<button id="photoBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">📷 Photo Vault खोलें</button>
+
+<button id="videoBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">🎥 Video Vault खोलें</button>
+
+<button id="recoveryBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">🔑 PIN Recovery</button>
+
+<input id="mediaFile" type="file" hidden>
+<div id="vaultStatus" style="margin:15px"></div>
+<div id="mediaList"></div>
 </div>
 `;
+
+const vaultOpen = indexedDB.open("SNSVault", 1);
+
+vaultOpen.onupgradeneeded = function(e) {
+  const vdb = e.target.result;
+  if (!vdb.objectStoreNames.contains("media")) {
+    vdb.createObjectStore("media", {keyPath:"id",autoIncrement:true});
+  }
+};
+
+vaultOpen.onsuccess = function(e) {
+  const vdb = e.target.result;
+  const status = document.getElementById("vaultStatus");
+  const list = document.getElementById("mediaList");
+  const fileInput = document.getElementById("mediaFile");
+  let mediaType = "image";
+
+  function showStatus(msg) {
+    status.textContent = msg;
+  }
+
+  function loadMedia() {
+    list.innerHTML = "";
+    const tx = vdb.transaction("media","readonly");
+    const req = tx.objectStore("media").getAll();
+
+    req.onsuccess = function() {
+      req.result.forEach(item => {
+        const card = document.createElement("div");
+        card.style.cssText =
+          "background:#49316a;padding:12px;margin:12px 0;border-radius:12px";
+
+        const name = document.createElement("p");
+        name.textContent = item.name;
+        card.appendChild(name);
+
+        const preview = document.createElement(
+          item.type.startsWith("video/") ? "video" : "img"
+        );
+        preview.src = URL.createObjectURL(item.file);
+        preview.style.cssText = "max-width:100%;max-height:260px";
+        if (preview.tagName === "VIDEO") preview.controls = true;
+        card.appendChild(preview);
+
+        const del = document.createElement("button");
+        del.textContent = "हटाएँ";
+        del.onclick = function() {
+          vdb.transaction("media","readwrite")
+            .objectStore("media").delete(item.id);
+          setTimeout(loadMedia,200);
+        };
+        card.appendChild(del);
+        list.appendChild(card);
+      });
+    };
+  }
+
+  document.getElementById("photoBtn").onclick = function() {
+    mediaType = "image";
+    fileInput.accept = "image/*";
+    fileInput.click();
+  };
+
+  document.getElementById("videoBtn").onclick = function() {
+    mediaType = "video";
+    fileInput.accept = "video/*";
+    fileInput.click();
+  };
+
+  fileInput.onchange = function() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (mediaType === "image" && !file.type.startsWith("image/")) {
+      showStatus("कृपया फोटो चुनें।");
+      return;
+    }
+
+    if (mediaType === "video" && !file.type.startsWith("video/")) {
+      showStatus("कृपया वीडियो चुनें।");
+      return;
+    }
+
+    const tx = vdb.transaction("media","readwrite");
+    tx.objectStore("media").add({
+      name:file.name,
+      type:file.type,
+      file:file
+    });
+
+    tx.oncomplete = function() {
+      showStatus("फाइल सुरक्षित हो गई।");
+      loadMedia();
+      fileInput.value = "";
+    };
+
+    tx.onerror = function() {
+      showStatus("फाइल सेव नहीं हुई। मोबाइल में जगह जाँचें।");
+    };
+  };
+
+  document.getElementById("recoveryBtn").onclick = async function() {
+    const user = auth.currentUser;
+    if (!user) {
+      showStatus("पहले मोबाइल OTP से लॉगिन करें।");
+      return;
+    }
+
+    const pin = prompt("नया 6 अंकों का PIN डालें:");
+    if (!pin) return;
+
+    if (!/^[0-9]{6}$/.test(pin)) {
+      showStatus("6 अंकों का PIN डालें।");
+      return;
+    }
+
+    const confirmPin = prompt("नया PIN दोबारा डालें:");
+    if (pin !== confirmPin) {
+      showStatus("दोनों PIN अलग हैं।");
+      return;
+    }
+
+    try {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const key = await crypto.subtle.importKey(
+        "raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]
+      );
+
+      const bits = await crypto.subtle.deriveBits({
+        name:"PBKDF2",
+        salt:salt,
+        iterations:310000,
+        hash:"SHA-256"
+      },key,256);
+
+      const saltText = btoa(String.fromCharCode(...salt));
+      const hashText = btoa(String.fromCharCode(...new Uint8Array(bits)));
+
+      await setDoc(doc(db,"users",user.uid),{
+        pinSalt:saltText,
+        pinHash:hashText
+      },{merge:true});
+
+      showStatus("नया PIN सफलतापूर्वक सेव हो गया।");
+    } catch(error) {
+      showStatus("PIN Recovery Error: " + error.message);
+    }
+  };
+
+  loadMedia();
+};
+
+vaultOpen.onerror = function() {
+  document.getElementById("vaultStatus").textContent =
+    "मोबाइल स्टोरेज शुरू नहीं हो पाया।";
+};
+
  }catch(e){
   console.error(e);
   msg.textContent="PIN Error: "+e.code+" "+e.message;
