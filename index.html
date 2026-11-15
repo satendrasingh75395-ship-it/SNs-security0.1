@@ -232,7 +232,45 @@ vaultOpen.onsuccess = function(e) {
     fileInput.accept = "video/*";
     fileInput.click();
   };
+function loadMedia() {
+  list.innerHTML = "";
+  const tx = vdb.transaction("media","readonly");
+  const req = tx.objectStore("media").getAll();
 
+  req.onsuccess = function() {
+    req.result
+      .filter(item => mediaType === "image"
+        ? item.type.startsWith("image/")
+        : item.type.startsWith("video/"))
+      .forEach(item => {
+        const card = document.createElement("div");
+        card.style.cssText =
+          "background:#49316a;padding:12px;margin:12px 0;border-radius:12px";
+
+        const name = document.createElement("p");
+        name.textContent = item.name;
+        card.appendChild(name);
+
+        const preview = document.createElement(
+          item.type.startsWith("video/") ? "video" : "img"
+        );
+        preview.src = URL.createObjectURL(item.file);
+        preview.style.cssText = "max-width:100%;max-height:260px";
+        if (preview.tagName === "VIDEO") preview.controls = true;
+        card.appendChild(preview);
+
+        const del = document.createElement("button");
+        del.textContent = "हटाएँ";
+        del.onclick = function() {
+          vdb.transaction("media","readwrite")
+            .objectStore("media").delete(item.id);
+          setTimeout(loadMedia,200);
+        };
+        card.appendChild(del);
+        list.appendChild(card);
+      });
+  };
+}
   fileInput.onchange = function() {
     const file = fileInput.files[0];
     if (!file) return;
