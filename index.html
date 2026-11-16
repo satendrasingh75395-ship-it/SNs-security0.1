@@ -35,7 +35,8 @@ button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;backg
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {
- getAuth,RecaptchaVerifier,signInWithPhoneNumber,onAuthStateChanged
+ getAuth,RecaptchaVerifier,signInWithPhoneNumber,onAuthStateChanged,
+PhoneAuthProvider,reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
  getFirestore,doc,setDoc,getDoc
