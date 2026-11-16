@@ -417,13 +417,6 @@ function showDashboard(){
   document.getElementById("vaultStatus").textContent =
     "मोबाइल स्टोरेज शुरू नहीं हो पाया।";
 };
-
- }catch(e){
-  console.error(e);
-  msg.textContent="PIN Error: "+e.code+" "+e.message;
- }finally{
-  btn.disabled=false;
- }
 }
 </script>
 </body>
