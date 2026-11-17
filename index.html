@@ -210,7 +210,21 @@ function showPinLogin(user){
  <div id="pinStatus">Dashboard खोलने के लिए सही PIN डालें।</div>
  <input id="loginPin" type="password" maxlength="6" inputmode="numeric" placeholder="6 अंकों का PIN">
  <button id="checkPin">PIN Verify करें</button>
+ <button id="forgotPin">PIN भूल गए?</button>
+
+ <div id="resetPanel" style="display:none">
+  <p>रजिस्टर्ड मोबाइल पर OTP भेजें।</p>
+  <div id="reset-recaptcha"></div>
+  <button id="sendResetOtp">OTP भेजें</button>
+  <input id="resetOtp" type="text" maxlength="6" inputmode="numeric" placeholder="6 अंकों का OTP" style="display:none">
+  <input id="resetNewPin" type="password" maxlength="6" inputmode="numeric" placeholder="नया 6 अंकों का PIN" style="display:none">
+  <input id="resetConfirmPin" type="password" maxlength="6" inputmode="numeric" placeholder="नया PIN दोबारा डालें" style="display:none">
+  <button id="saveResetPin" style="display:none">नया PIN सेव करें</button>
+ </div>
  </div>`;
+
+ let resetVerifier=null;
+ let verificationId=null;
 
  document.getElementById("checkPin").onclick=async()=>{
   const pin=document.getElementById("loginPin").value.trim();
@@ -232,10 +246,9 @@ function showPinLogin(user){
     throw new Error("PIN जानकारी अधूरी है।");
    }
 
-   const salt=base64ToBytes(data.pinSalt);
-   const enteredHash=await makePinHash(pin,salt);
+   const hash=await makePinHash(pin,base64ToBytes(data.pinSalt));
 
-   if(enteredHash!==data.pinHash){
+   if(hash!==data.pinHash){
     msg.textContent="गलत PIN! दोबारा कोशिश करें।";
     document.getElementById("loginPin").value="";
     return;
@@ -248,7 +261,98 @@ function showPinLogin(user){
    btn.disabled=false;
   }
  };
+
+ document.getElementById("forgotPin").onclick=()=>{
+  document.getElementById("resetPanel").style.display="block";
+  document.getElementById("pinStatus").textContent="OTP से नया PIN बनाएं।";
+ };
+
+ document.getElementById("sendResetOtp").onclick=async()=>{
+  const msg=document.getElementById("pinStatus");
+  const btn=document.getElementById("sendResetOtp");
+
+  if(!user.phoneNumber){
+   msg.textContent="इस खाते में मोबाइल नंबर उपलब्ध नहीं है।";
+   return;
+  }
+
+  btn.disabled=true;
+  try{
+   resetVerifier=new RecaptchaVerifier(
+    auth,"reset-recaptcha",{size:"normal"}
+   );
+
+   const provider=new PhoneAuthProvider(auth);
+   verificationId=await provider.verifyPhoneNumber(
+    {phoneNumber:user.phoneNumber},resetVerifier
+   );
+
+   msg.textContent="OTP आपके रजिस्टर्ड मोबाइल पर भेज दिया गया है।";
+
+   document.getElementById("resetOtp").style.display="block";
+   document.getElementById("resetNewPin").style.display="block";
+   document.getElementById("resetConfirmPin").style.display="block";
+   document.getElementById("saveResetPin").style.display="block";
+
+  }catch(e){
+   msg.textContent="OTP Error: "+e.code+" "+e.message;
+   if(resetVerifier){
+    resetVerifier.clear();
+    resetVerifier=null;
+   }
+  }finally{
+   btn.disabled=false;
+  }
+ };
+
+ document.getElementById("saveResetPin").onclick=async()=>{
+  const msg=document.getElementById("pinStatus");
+  const btn=document.getElementById("saveResetPin");
+  const otp=document.getElementById("resetOtp").value.trim();
+  const pin=document.getElementById("resetNewPin").value.trim();
+  const confirm=document.getElementById("resetConfirmPin").value.trim();
+
+  if(!verificationId){
+   msg.textContent="पहले OTP भेजें।";
+   return;
+  }
+  if(!/^\d{6}$/.test(otp)){
+   msg.textContent="सही 6 अंकों का OTP डालें।";
+   return;
+  }
+  if(!/^\d{6}$/.test(pin)){
+   msg.textContent="नया 6 अंकों का PIN डालें।";
+   return;
+  }
+  if(pin!==confirm){
+   msg.textContent="दोनों PIN अलग हैं।";
+   return;
+  }
+
+  btn.disabled=true;
+  try{
+   const credential=PhoneAuthProvider.credential(verificationId,otp);
+   await reauthenticateWithCredential(user,credential);
+
+   const salt=crypto.getRandomValues(new Uint8Array(16));
+   const hash=await makePinHash(pin,salt);
+
+   await setDoc(doc(db,"users",user.uid),{
+    pinSalt:bytesToBase64(salt),
+    pinHash:hash
+   },{merge:true});
+
+   msg.textContent="नया PIN सुरक्षित हो गया।";
+   showDashboard();
+
+  }catch(e){
+   msg.textContent="PIN Recovery Error: "+e.code+" "+e.message;
+  }finally{
+   btn.disabled=false;
+  }
+ };
 }
+ 
 
 function showDashboard(){
  document.body.innerHTML=`
