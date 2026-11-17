@@ -5,38 +5,165 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#21123f">
 <title>SNs Security 0.1</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:linear-gradient(140deg,#17102c,#542a91);color:white;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:18px}
-.card{width:100%;max-width:390px;background:#ffffff12;border:1px solid #ffffff30;border-radius:22px;padding:25px;text-align:center}
+body{
+ margin:0;min-height:100vh;
+ background:linear-gradient(140deg,#17102c,#542a91);
+ color:white;font-family:Arial,sans-serif;
+ display:flex;align-items:center;justify-content:center;padding:18px
+}
+body.app-mode{
+ display:block;padding:0;background:#17102c;
+}
+.card{
+ width:100%;max-width:390px;background:#ffffff12;
+ border:1px solid #ffffff30;border-radius:22px;
+ padding:25px;text-align:center;margin:auto
+}
 .logo{font-size:45px}
 h1{color:#d8c5ff}
 p{line-height:1.6}
-input{width:100%;padding:14px;margin:9px 0;border:0;border-radius:9px;font-size:16px}
-button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#c4a5ff;color:#21123f;font-size:16px;font-weight:bold}
-#status,#pinStatus{padding:12px;margin:15px 0;background:#ffffff18;border-radius:9px;overflow-wrap:anywhere}
+input{
+ width:100%;padding:14px;margin:9px 0;
+ border:0;border-radius:9px;font-size:16px
+}
+button{
+ width:100%;padding:14px;margin-top:10px;
+ border:0;border-radius:10px;background:#c4a5ff;
+ color:#21123f;font-size:16px;font-weight:bold;
+ cursor:pointer
+}
+button:disabled{opacity:.5}
+#status,#pinStatus{
+ padding:12px;margin:15px 0;
+ background:#ffffff18;border-radius:9px;overflow-wrap:anywhere
+}
 .small{font-size:12px;color:#ddd}
+
+/* Dashboard */
+.app-shell{
+ --main:#21123f;
+ --accent:#c4a5ff;
+ --panel:#49316a;
+ min-height:100vh;width:100%;
+ max-width:900px;margin:auto;
+ padding:18px;
+ background-color:var(--main);
+ background-size:cover;background-position:center;
+ background-attachment:fixed;
+}
+.app-header{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;flex-wrap:wrap;margin-bottom:22px;
+}
+.app-header h1{margin:0;font-size:23px;color:white}
+.app-header p{margin:5px 0;color:#e5dafa;font-size:13px}
+.app-content{
+ background:#100b20bd;
+ border:1px solid #ffffff24;
+ border-radius:20px;padding:16px;
+}
+.dashboard-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+.dash-card{
+ background:var(--panel);border:1px solid #ffffff24;
+ border-radius:15px;padding:18px 10px;
+ text-align:center;min-height:125px;
+ display:flex;flex-direction:column;justify-content:center;
+}
+.dash-card .emoji{font-size:32px;margin-bottom:8px}
+.dash-card strong{font-size:15px;color:white}
+.dash-card small{color:#e2d4f6;margin-top:6px}
+.dash-card button{margin-top:0;background:transparent;color:white;padding:0}
+.section-title{font-size:20px;margin:5px 0 15px;color:white}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+.top-actions button{width:auto;flex:1;padding:11px 8px;margin:0}
+.secondary{background:#ffffff20;color:white;border:1px solid #ffffff40}
+.accent-button{background:var(--accent);color:#21123f}
+.back-button{background:#ffffff20;color:white}
+.status-line{font-size:13px;color:#e4d8f7;margin:12px 0}
+.gallery-grid{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;
+}
+.media-card{
+ position:relative;aspect-ratio:1/1;min-width:0;
+ overflow:hidden;border-radius:9px;background:#33234c;
+ border:1px solid #ffffff30;
+}
+.media-card img,.media-card video{
+ width:100%;height:100%;object-fit:cover;display:block;
+}
+.media-card .play-mark{
+ position:absolute;inset:0;display:flex;align-items:center;
+ justify-content:center;font-size:25px;
+ background:#00000024;pointer-events:none;
+}
+.media-card .delete-small{
+ position:absolute;right:3px;top:3px;width:27px;height:27px;
+ padding:0;margin:0;border-radius:50%;font-size:14px;
+ background:#b52b42;color:white;
+}
+.empty-message{
+ text-align:center;color:#e0d5ee;padding:35px 8px;
+ background:#ffffff10;border-radius:12px;
+}
+.settings-box{
+ background:#ffffff12;border:1px solid #ffffff25;
+ padding:14px;border-radius:13px;margin:12px 0;
+}
+.theme-grid{
+ display:grid;grid-template-columns:repeat(4,1fr);gap:9px;
+}
+.theme-choice{
+ height:55px;border:3px solid transparent;border-radius:10px;
+ margin:0;padding:0;
+}
+.theme-choice.selected{border-color:white}
+#viewer{
+ position:fixed;inset:0;background:#080610f2;
+ z-index:20;display:none;align-items:center;justify-content:center;
+ padding:15px;flex-direction:column;
+}
+#viewer.active{display:flex}
+#viewerContent{
+ max-width:100%;max-height:78vh;display:flex;
+ align-items:center;justify-content:center;
+}
+#viewerContent img,#viewerContent video{
+ max-width:100%;max-height:78vh;object-fit:contain;
+}
+#viewerClose{max-width:300px;background:#c4a5ff}
+.footer-note{text-align:center;color:#d5c6e9;font-size:12px;margin-top:20px}
+@media(max-width:360px){
+ .app-shell{padding:10px}
+ .gallery-grid{gap:5px}
+ .dash-card{padding:13px 6px}
+}
 </style>
 </head>
+
 <body>
 <div class="card" id="app">
-<div class="logo">🔐</div>
-<h1>SNs Security</h1>
-<p>आपकी निजी सुरक्षा का पहला चरण</p>
-<div id="status">मोबाइल नंबर डालें</div>
-<input id="phone" type="tel" placeholder="+91 मोबाइल नंबर">
-<div id="recaptcha-container"></div>
-<button id="sendOtp">OTP भेजें</button>
-<input id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंकों का OTP">
-<button id="verifyOtp">OTP Verify करें</button>
-<p class="small">SNs-security0.1</p>
+ <div class="logo">🔐</div>
+ <h1>SNs Security</h1>
+ <p>आपकी निजी सुरक्षा का पहला चरण</p>
+ <div id="status">मोबाइल नंबर डालें</div>
+ <input id="phone" type="tel" placeholder="+91 मोबाइल नंबर">
+ <div id="recaptcha-container"></div>
+ <button id="sendOtp">OTP भेजें</button>
+ <input id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंकों का OTP">
+ <button id="verifyOtp">OTP Verify करें</button>
+ <p class="small">SNs-security0.1</p>
 </div>
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {
  getAuth,RecaptchaVerifier,signInWithPhoneNumber,onAuthStateChanged,
-PhoneAuthProvider,reauthenticateWithCredential
+ PhoneAuthProvider,reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
  getFirestore,doc,setDoc,getDoc
@@ -62,13 +189,12 @@ let activeScreenUid="";
 
 function status(msg){
  const el=document.getElementById("status");
- if(el) el.textContent=msg;
+ if(el)el.textContent=msg;
 }
 
 function bytesToBase64(bytes){
  return btoa(String.fromCharCode(...bytes));
 }
-
 function base64ToBytes(value){
  return Uint8Array.from(atob(value),c=>c.charCodeAt(0));
 }
@@ -83,16 +209,15 @@ async function makePinHash(pin,salt){
  return bytesToBase64(new Uint8Array(bits));
 }
 
+/* OTP Login */
 document.getElementById("sendOtp").onclick=async()=>{
  const btn=document.getElementById("sendOtp");
  let phone=document.getElementById("phone").value.trim().replace(/\s/g,"");
- if(!phone.startsWith("+")) phone="+91"+phone.replace(/^0/,"");
+ if(!phone.startsWith("+"))phone="+91"+phone.replace(/^0/,"");
 
  if(!/^\+91[6-9]\d{9}$/.test(phone)){
-  status("सही 10 अंकों का मोबाइल नंबर डालें।");
-  return;
+  status("सही 10 अंकों का मोबाइल नंबर डालें।");return;
  }
-
  btn.disabled=true;
  try{
   if(!verifier){
@@ -105,23 +230,13 @@ document.getElementById("sendOtp").onclick=async()=>{
   console.error(e);
   status("OTP Error: "+e.code+" "+e.message);
   if(verifier){verifier.clear();verifier=null;}
- }finally{
-  btn.disabled=false;
- }
+ }finally{btn.disabled=false;}
 };
 
 document.getElementById("verifyOtp").onclick=async()=>{
  const code=document.getElementById("otp").value.trim();
-
- if(!confirmationResult){
-  status("पहले OTP भेजें।");
-  return;
- }
- if(!/^\d{6}$/.test(code)){
-  status("6 अंकों का OTP डालें।");
-  return;
- }
-
+ if(!confirmationResult){status("पहले OTP भेजें।");return;}
+ if(!/^\d{6}$/.test(code)){status("6 अंकों का OTP डालें।");return;}
  try{
   await confirmationResult.confirm(code);
   status("OTP सफलतापूर्वक Verify हो गया।");
@@ -132,11 +247,8 @@ document.getElementById("verifyOtp").onclick=async()=>{
 };
 
 onAuthStateChanged(auth,async user=>{
- if(!user){
-  activeScreenUid="";
-  return;
- }
- if(activeScreenUid===user.uid) return;
+ if(!user){activeScreenUid="";return;}
+ if(activeScreenUid===user.uid)return;
  activeScreenUid=user.uid;
  await routeUser(user);
 });
@@ -144,19 +256,18 @@ onAuthStateChanged(auth,async user=>{
 async function routeUser(user){
  try{
   const snap=await getDoc(doc(db,"users",user.uid));
-
-  if(snap.exists() && snap.data().pinHash && snap.data().pinSalt){
+  if(snap.exists()&&snap.data().pinHash&&snap.data().pinSalt){
    showPinLogin(user);
-  }else{
-   showPinSetup(user);
-  }
+  }else{showPinSetup(user);}
  }catch(e){
   document.body.innerHTML=
    '<div class="card">PIN जानकारी नहीं मिल सकी। इंटरनेट जाँचकर पेज दोबारा खोलें।<p>'+e.message+'</p></div>';
  }
 }
 
+/* PIN Setup */
 function showPinSetup(user){
+ document.body.className="";
  document.body.innerHTML=`
  <div class="card">
  <div class="logo">🔐</div>
@@ -172,36 +283,24 @@ function showPinSetup(user){
   const confirm=document.getElementById("confirmPin").value.trim();
   const msg=document.getElementById("pinStatus");
   const btn=document.getElementById("savePin");
-
-  if(!/^\d{6}$/.test(pin)){
-   msg.textContent="6 अंकों का PIN डालें।";
-   return;
-  }
-  if(pin!==confirm){
-   msg.textContent="दोनों PIN अलग हैं।";
-   return;
-  }
-
+  if(!/^\d{6}$/.test(pin)){msg.textContent="6 अंकों का PIN डालें।";return;}
+  if(pin!==confirm){msg.textContent="दोनों PIN अलग हैं।";return;}
   btn.disabled=true;
   try{
    const salt=crypto.getRandomValues(new Uint8Array(16));
    const hashText=await makePinHash(pin,salt);
-
    await setDoc(doc(db,"users",user.uid),{
-    pinSalt:bytesToBase64(salt),
-    pinHash:hashText
+    pinSalt:bytesToBase64(salt),pinHash:hashText
    },{merge:true});
-
    showDashboard();
-  }catch(e){
-   msg.textContent="PIN Error: "+e.message;
-  }finally{
-   btn.disabled=false;
-  }
+  }catch(e){msg.textContent="PIN Error: "+e.message;}
+  finally{btn.disabled=false;}
  };
 }
 
+/* PIN Login and Recovery */
 function showPinLogin(user){
+ document.body.className="";
  document.body.innerHTML=`
  <div class="card">
  <div class="logo">🔐</div>
@@ -211,7 +310,6 @@ function showPinLogin(user){
  <input id="loginPin" type="password" maxlength="6" inputmode="numeric" placeholder="6 अंकों का PIN">
  <button id="checkPin">PIN Verify करें</button>
  <button id="forgotPin">PIN भूल गए?</button>
-
  <div id="resetPanel" style="display:none">
   <p>रजिस्टर्ड मोबाइल पर OTP भेजें।</p>
   <div id="reset-recaptcha"></div>
@@ -230,36 +328,22 @@ function showPinLogin(user){
   const pin=document.getElementById("loginPin").value.trim();
   const msg=document.getElementById("pinStatus");
   const btn=document.getElementById("checkPin");
-
-  if(!/^\d{6}$/.test(pin)){
-   msg.textContent="6 अंकों का PIN डालें।";
-   return;
-  }
-
+  if(!/^\d{6}$/.test(pin)){msg.textContent="6 अंकों का PIN डालें।";return;}
   btn.disabled=true;
   try{
    const snap=await getDoc(doc(db,"users",user.uid));
-   if(!snap.exists()) throw new Error("PIN रिकॉर्ड नहीं मिला।");
-
+   if(!snap.exists())throw new Error("PIN रिकॉर्ड नहीं मिला।");
    const data=snap.data();
-   if(!data.pinSalt || !data.pinHash){
-    throw new Error("PIN जानकारी अधूरी है।");
-   }
-
+   if(!data.pinSalt||!data.pinHash)throw new Error("PIN जानकारी अधूरी है।");
    const hash=await makePinHash(pin,base64ToBytes(data.pinSalt));
-
    if(hash!==data.pinHash){
     msg.textContent="गलत PIN! दोबारा कोशिश करें।";
     document.getElementById("loginPin").value="";
     return;
    }
-
    showDashboard();
-  }catch(e){
-   msg.textContent="PIN Error: "+e.message;
-  }finally{
-   btn.disabled=false;
-  }
+  }catch(e){msg.textContent="PIN Error: "+e.message;}
+  finally{btn.disabled=false;}
  };
 
  document.getElementById("forgotPin").onclick=()=>{
@@ -270,39 +354,23 @@ function showPinLogin(user){
  document.getElementById("sendResetOtp").onclick=async()=>{
   const msg=document.getElementById("pinStatus");
   const btn=document.getElementById("sendResetOtp");
-
-  if(!user.phoneNumber){
-   msg.textContent="इस खाते में मोबाइल नंबर उपलब्ध नहीं है।";
-   return;
-  }
-
+  if(!user.phoneNumber){msg.textContent="इस खाते में मोबाइल नंबर उपलब्ध नहीं है।";return;}
   btn.disabled=true;
   try{
-   resetVerifier=new RecaptchaVerifier(
-    auth,"reset-recaptcha",{size:"normal"}
-   );
-
+   resetVerifier=new RecaptchaVerifier(auth,"reset-recaptcha",{size:"normal"});
    const provider=new PhoneAuthProvider(auth);
    verificationId=await provider.verifyPhoneNumber(
     {phoneNumber:user.phoneNumber},resetVerifier
    );
-
    msg.textContent="OTP आपके रजिस्टर्ड मोबाइल पर भेज दिया गया है।";
-
    document.getElementById("resetOtp").style.display="block";
    document.getElementById("resetNewPin").style.display="block";
    document.getElementById("resetConfirmPin").style.display="block";
    document.getElementById("saveResetPin").style.display="block";
-
   }catch(e){
    msg.textContent="OTP Error: "+e.code+" "+e.message;
-   if(resetVerifier){
-    resetVerifier.clear();
-    resetVerifier=null;
-   }
-  }finally{
-   btn.disabled=false;
-  }
+   if(resetVerifier){resetVerifier.clear();resetVerifier=null;}
+  }finally{btn.disabled=false;}
  };
 
  document.getElementById("saveResetPin").onclick=async()=>{
@@ -311,209 +379,427 @@ function showPinLogin(user){
   const otp=document.getElementById("resetOtp").value.trim();
   const pin=document.getElementById("resetNewPin").value.trim();
   const confirm=document.getElementById("resetConfirmPin").value.trim();
-
-  if(!verificationId){
-   msg.textContent="पहले OTP भेजें।";
-   return;
-  }
-  if(!/^\d{6}$/.test(otp)){
-   msg.textContent="सही 6 अंकों का OTP डालें।";
-   return;
-  }
-  if(!/^\d{6}$/.test(pin)){
-   msg.textContent="नया 6 अंकों का PIN डालें।";
-   return;
-  }
-  if(pin!==confirm){
-   msg.textContent="दोनों PIN अलग हैं।";
-   return;
-  }
-
+  if(!verificationId){msg.textContent="पहले OTP भेजें।";return;}
+  if(!/^\d{6}$/.test(otp)){msg.textContent="सही 6 अंकों का OTP डालें।";return;}
+  if(!/^\d{6}$/.test(pin)){msg.textContent="नया 6 अंकों का PIN डालें।";return;}
+  if(pin!==confirm){msg.textContent="दोनों PIN अलग हैं।";return;}
   btn.disabled=true;
   try{
    const credential=PhoneAuthProvider.credential(verificationId,otp);
    await reauthenticateWithCredential(user,credential);
-
    const salt=crypto.getRandomValues(new Uint8Array(16));
    const hash=await makePinHash(pin,salt);
-
    await setDoc(doc(db,"users",user.uid),{
-    pinSalt:bytesToBase64(salt),
-    pinHash:hash
+    pinSalt:bytesToBase64(salt),pinHash:hash
    },{merge:true});
-
    msg.textContent="नया PIN सुरक्षित हो गया।";
    showDashboard();
-
-  }catch(e){
-   msg.textContent="PIN Recovery Error: "+e.code+" "+e.message;
-  }finally{
-   btn.disabled=false;
-  }
+  }catch(e){msg.textContent="PIN Recovery Error: "+e.code+" "+e.message;}
+  finally{btn.disabled=false;}
  };
 }
- 
 
+/* Main Dashboard, Gallery, Wallpaper and Themes */
 function showDashboard(){
+ document.body.className="app-mode";
  document.body.innerHTML=`
- <div style="background:#281344;color:white;min-height:100vh;width:100%;padding:22px;text-align:center;font-family:Arial">
- <h1>🔐 SNs Security</h1>
- <h2>Dashboard</h2>
- <p>आपका PIN सुरक्षित है।</p>
- <button id="photoBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">📷 Photo Vault खोलें</button>
- <button id="videoBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">🎥 Video Vault खोलें</button>
- <button id="recoveryBtn" style="padding:16px;width:100%;margin:8px;background:#c5a2ff;border:0;border-radius:12px">🔑 PIN Recovery</button>
- <input id="mediaFile" type="file" hidden>
- <div id="vaultStatus" style="margin:15px"></div>
- <div id="mediaList"></div>
- </div>`;
+ <main class="app-shell" id="appShell">
+  <header class="app-header">
+   <div>
+    <h1>🔐 SNs Security</h1>
+    <p>आपकी निजी सुरक्षित जगह</p>
+   </div>
+   <button id="homeButton" class="secondary" style="width:auto;margin:0">🏠 Home</button>
+  </header>
 
- const vaultOpen=indexedDB.open("SNSVault",1);
+  <section class="app-content" id="mainContent">
+   <h2 class="section-title">My Dashboard</h2>
+   <div class="dashboard-grid">
+    <div class="dash-card">
+     <div class="emoji">📷</div>
+     <strong>Photo Vault</strong>
+     <small>अपनी फोटो सुरक्षित रखें</small>
+     <button id="photoBtn">खोलें</button>
+    </div>
+    <div class="dash-card">
+     <div class="emoji">🎬</div>
+     <strong>Video Vault</strong>
+     <small>अपने वीडियो सुरक्षित रखें</small>
+     <button id="videoBtn">खोलें</button>
+    </div>
+    <div class="dash-card">
+     <div class="emoji">🎨</div>
+     <strong>Theme Settings</strong>
+     <small>अपना रंग चुनें</small>
+     <button id="themeBtn">सेटिंग खोलें</button>
+    </div>
+    <div class="dash-card">
+     <div class="emoji">🖼️</div>
+     <strong>My Wallpaper</strong>
+     <small>अपनी फोटो लगाएं</small>
+     <button id="wallpaperBtn">Wallpaper चुनें</button>
+    </div>
+    <div class="dash-card">
+     <div class="emoji">🔑</div>
+     <strong>PIN Recovery</strong>
+     <small>अपना PIN बदलें</small>
+     <button id="recoveryBtn">PIN बदलें</button>
+    </div>
+   </div>
+   <div class="footer-note">SNs Security 0.1</div>
+  </section>
+
+  <input id="mediaFile" type="file" accept="image/*" multiple hidden>
+  <input id="wallpaperFile" type="file" accept="image/*" hidden>
+
+  <div id="viewer">
+   <div id="viewerContent"></div>
+   <button id="viewerClose">बंद करें</button>
+  </div>
+ </main>`;
+
+ const shell=document.getElementById("appShell");
+ const main=document.getElementById("mainContent");
+ const fileInput=document.getElementById("mediaFile");
+ const wallpaperInput=document.getElementById("wallpaperFile");
+ const viewer=document.getElementById("viewer");
+ const viewerContent=document.getElementById("viewerContent");
+
+ let mediaType="image";
+ let currentPage="home";
+ let objectUrls=[];
+
+ const themes={
+  purple:{main:"#21123f",accent:"#c4a5ff",panel:"#49316a"},
+  blue:{main:"#10233f",accent:"#8fc7ff",panel:"#244b77"},
+  green:{main:"#102f27",accent:"#8be0b7",panel:"#205c49"},
+  pink:{main:"#3d1831",accent:"#ffafd8",panel:"#73365e"}
+ };
+
+ /* IndexedDB version 2: पुराने media रिकॉर्ड सुरक्षित रहेंगे */
+ const vaultOpen=indexedDB.open("SNSVault",2);
 
  vaultOpen.onupgradeneeded=function(e){
   const vdb=e.target.result;
   if(!vdb.objectStoreNames.contains("media")){
    vdb.createObjectStore("media",{keyPath:"id",autoIncrement:true});
   }
+  if(!vdb.objectStoreNames.contains("settings")){
+   vdb.createObjectStore("settings",{keyPath:"key"});
+  }
  };
 
- vaultOpen.onsuccess=function(e){
+ vaultOpen.onsuccess=async function(e){
   const vdb=e.target.result;
-  const status=document.getElementById("vaultStatus");
-  const list=document.getElementById("mediaList");
-  const fileInput=document.getElementById("mediaFile");
-  let mediaType="image";
 
-  function showStatus(msg){
-   status.textContent=msg;
+  function saveSetting(key,value){
+   return new Promise((resolve,reject)=>{
+    const tx=vdb.transaction("settings","readwrite");
+    tx.objectStore("settings").put({key:key,value:value});
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+   });
+  }
+
+  function readSetting(key){
+   return new Promise((resolve,reject)=>{
+    const tx=vdb.transaction("settings","readonly");
+    const req=tx.objectStore("settings").get(key);
+    req.onsuccess=()=>resolve(req.result?req.result.value:null);
+    req.onerror=()=>reject(req.error);
+   });
+  }
+
+  function applyTheme(name){
+   const theme=themes[name]||themes.purple;
+   shell.style.setProperty("--main",theme.main);
+   shell.style.setProperty("--accent",theme.accent);
+   shell.style.setProperty("--panel",theme.panel);
+   document.querySelector('meta[name="theme-color"]').content=theme.main;
+  }
+
+  async function loadPreferences(){
+   try{
+    const theme=await readSetting("theme");
+    applyTheme(theme||"purple");
+    const wallpaper=await readSetting("wallpaper");
+    if(wallpaper){
+     const url=URL.createObjectURL(wallpaper);
+     objectUrls.push(url);
+     shell.style.backgroundImage=
+      "linear-gradient(#100b2040,#100b2060),url("+JSON.stringify(url)+")";
+    }
+   }catch(err){console.error(err);}
+  }
+
+  await loadPreferences();
+
+  function showStatus(message){
+   const el=document.getElementById("vaultStatus");
+   if(el)el.textContent=message;
+  }
+
+  function clearUrls(){
+   objectUrls.forEach(url=>URL.revokeObjectURL(url));
+   objectUrls=[];
+  }
+
+  function showHome(){
+   currentPage="home";
+   main.innerHTML=`
+    <h2 class="section-title">My Dashboard</h2>
+    <div class="dashboard-grid">
+     <div class="dash-card"><div class="emoji">📷</div><strong>Photo Vault</strong><small>अपनी फोटो सुरक्षित रखें</small><button id="photoBtn2">खोलें</button></div>
+     <div class="dash-card"><div class="emoji">🎬</div><strong>Video Vault</strong><small>अपने वीडियो सुरक्षित रखें</small><button id="videoBtn2">खोलें</button></div>
+     <div class="dash-card"><div class="emoji">🎨</div><strong>Theme Settings</strong><small>अपना रंग चुनें</small><button id="themeBtn2">सेटिंग खोलें</button></div>
+     <div class="dash-card"><div class="emoji">🖼️</div><strong>My Wallpaper</strong><small>अपनी फोटो लगाएं</small><button id="wallpaperBtn2">Wallpaper चुनें</button></div>
+     <div class="dash-card"><div class="emoji">🔑</div><strong>PIN Recovery</strong><small>अपना PIN बदलें</small><button id="recoveryBtn2">PIN बदलें</button></div>
+    </div>
+    <div class="footer-note">SNs Security 0.1</div>`;
+
+   document.getElementById("photoBtn2").onclick=()=>openGallery("image");
+   document.getElementById("videoBtn2").onclick=()=>openGallery("video");
+   document.getElementById("themeBtn2").onclick=showThemes;
+   document.getElementById("wallpaperBtn2").onclick=()=>wallpaperInput.click();
+   document.getElementById("recoveryBtn2").onclick=changePin;
+  }
+
+  async function openGallery(type){
+   mediaType=type;
+   currentPage=type;
+   clearUrls();
+
+   main.innerHTML=`
+    <h2 class="section-title">${type==="image"?"📷 Photo Vault":"🎬 Video Vault"}</h2>
+    <div class="top-actions">
+     <button class="back-button" id="galleryBack">← वापस</button>
+     <button class="accent-button" id="addMedia">${type==="image"?"＋ फोटो जोड़ें":"＋ वीडियो जोड़ें"}</button>
+    </div>
+    <div id="vaultStatus" class="status-line">आपकी फाइलें लोड हो रही हैं...</div>
+    <div id="mediaList" class="gallery-grid"></div>
+    <p class="footer-note">फाइल खोलने के लिए उस पर दबाएं।</p>`;
+
+   document.getElementById("galleryBack").onclick=showHome;
+   document.getElementById("addMedia").onclick=()=>{
+    fileInput.accept=type==="image"?"image/*":"video/*";
+    fileInput.multiple=true;
+    fileInput.click();
+   };
+
+   loadMedia();
   }
 
   function loadMedia(){
+   const list=document.getElementById("mediaList");
+   if(!list)return;
+   clearUrls();
    list.innerHTML="";
+   showStatus("फाइलें लोड हो रही हैं...");
+
    const tx=vdb.transaction("media","readonly");
    const req=tx.objectStore("media").getAll();
 
    req.onsuccess=function(){
-    req.result.filter(item=>
+    if(!document.getElementById("mediaList"))return;
+
+    const items=req.result.filter(item=>
      mediaType==="image"
-      ? item.type.startsWith("image/")
-      : item.type.startsWith("video/")
-    ).forEach(item=>{
+      ?item.type.startsWith("image/")
+      :item.type.startsWith("video/")
+    ).sort((a,b)=>(b.id||0)-(a.id||0));
+
+    showStatus(items.length+" फाइलें मिलीं।");
+
+    if(items.length===0){
+     list.innerHTML='<div class="empty-message" style="grid-column:1/-1">'+
+      (mediaType==="image"?"अभी कोई फोटो नहीं है। फोटो जोड़ें दबाएं।":"अभी कोई वीडियो नहीं है। वीडियो जोड़ें दबाएं।")+
+      '</div>';
+     return;
+    }
+
+    items.forEach(item=>{
      const card=document.createElement("div");
-     card.style.cssText="background:#49316a;padding:12px;margin:12px 0;border-radius:12px";
+     card.className="media-card";
 
-     const name=document.createElement("p");
-     name.textContent=item.name;
-     card.appendChild(name);
+     const url=URL.createObjectURL(item.file);
+     objectUrls.push(url);
 
-     const preview=document.createElement(
-      item.type.startsWith("video/")?"video":"img"
-     );
-     preview.src=URL.createObjectURL(item.file);
-     preview.style.cssText="max-width:100%;max-height:260px";
-     if(preview.tagName==="VIDEO") preview.controls=true;
-     card.appendChild(preview);
+     const preview=document.createElement(mediaType==="image"?"img":"video");
+     preview.src=url;
+     preview.alt=item.name||"Vault media";
+
+     if(mediaType==="video"){
+      preview.muted=true;
+      preview.playsInline=true;
+      preview.preload="metadata";
+      const play=document.createElement("div");
+      play.className="play-mark";
+      play.textContent="▶";
+      card.appendChild(preview);
+      card.appendChild(play);
+     }else{
+      card.appendChild(preview);
+     }
 
      const del=document.createElement("button");
-     del.textContent="हटाएँ";
-     del.onclick=function(){
+     del.className="delete-small";
+     del.textContent="×";
+     del.title="हटाएं";
+     del.onclick=function(event){
+      event.stopPropagation();
+      if(!confirm("क्या यह फाइल हटानी है?"))return;
       const deleteTx=vdb.transaction("media","readwrite");
       deleteTx.objectStore("media").delete(item.id);
       deleteTx.oncomplete=loadMedia;
      };
      card.appendChild(del);
+
+     card.onclick=()=>openViewer(item);
      list.appendChild(card);
     });
    };
+
+   req.onerror=()=>showStatus("फाइलें लोड नहीं हो सकीं।");
   }
 
-  document.getElementById("photoBtn").onclick=function(){
-   mediaType="image";
-   fileInput.accept="image/*";
-   loadMedia();
-   fileInput.click();
-  };
+  function openViewer(item){
+   viewerContent.innerHTML="";
+   const url=URL.createObjectURL(item.file);
+   objectUrls.push(url);
 
-  document.getElementById("videoBtn").onclick=function(){
-   mediaType="video";
-   fileInput.accept="video/*";
-   loadMedia();
-   fileInput.click();
+   const media=document.createElement(item.type.startsWith("video/")?"video":"img");
+   media.src=url;
+   if(media.tagName==="VIDEO"){
+    media.controls=true;
+    media.autoplay=true;
+    media.playsInline=true;
+   }
+   viewerContent.appendChild(media);
+   viewer.classList.add("active");
+  }
+
+  document.getElementById("viewerClose").onclick=()=>{
+   viewer.classList.remove("active");
+   viewerContent.innerHTML="";
   };
 
   fileInput.onchange=function(){
-   const file=fileInput.files[0];
-   if(!file) return;
+   const files=Array.from(fileInput.files||[]);
+   if(!files.length)return;
 
-   if(mediaType==="image" && !file.type.startsWith("image/")){
-    showStatus("कृपया फोटो चुनें।");
-    return;
-   }
-   if(mediaType==="video" && !file.type.startsWith("video/")){
-    showStatus("कृपया वीडियो चुनें।");
-    return;
-   }
-
-   const tx=vdb.transaction("media","readwrite");
-   tx.objectStore("media").add({
-    name:file.name,type:file.type,file:file
-   });
-
-   tx.oncomplete=function(){
-    showStatus("फाइल सुरक्षित हो गई।");
-    loadMedia();
+   const valid=files.filter(file=>
+    mediaType==="image"?file.type.startsWith("image/"):file.type.startsWith("video/")
+   );
+   if(!valid.length){
+    showStatus("सही प्रकार की फाइल चुनें।");
     fileInput.value="";
+    return;
+   }
+
+   showStatus("फाइलें सेव हो रही हैं...");
+   const tx=vdb.transaction("media","readwrite");
+   valid.forEach(file=>{
+    tx.objectStore("media").add({
+     name:file.name,type:file.type,file:file,createdAt:Date.now()
+    });
+   });
+   tx.oncomplete=function(){
+    fileInput.value="";
+    showStatus(valid.length+" फाइलें Vault में सेव हो गईं।");
+    openGallery(mediaType);
    };
    tx.onerror=function(){
-    showStatus("फाइल सेव नहीं हुई। मोबाइल में जगह जाँचें।");
+    showStatus("फाइल सेव नहीं हुई। मोबाइल में खाली जगह जाँचें।");
+    fileInput.value="";
    };
   };
 
-  document.getElementById("recoveryBtn").onclick=async function(){
-   const user=auth.currentUser;
-   if(!user){
-    showStatus("पहले मोबाइल OTP से लॉगिन करें।");
-    return;
+  function showThemes(){
+   currentPage="themes";
+   main.innerHTML=`
+    <h2 class="section-title">🎨 Theme Settings</h2>
+    <div class="settings-box">
+     <p>अपनी पसंद का रंग चुनें:</p>
+     <div class="theme-grid">
+      <button class="theme-choice" data-theme="purple" style="background:#49316a" title="Purple"></button>
+      <button class="theme-choice" data-theme="blue" style="background:#244b77" title="Blue"></button>
+      <button class="theme-choice" data-theme="green" style="background:#205c49" title="Green"></button>
+      <button class="theme-choice" data-theme="pink" style="background:#73365e" title="Pink"></button>
+     </div>
+     <div id="themeStatus" class="status-line">अपनी पसंद का रंग चुनें।</div>
+    </div>
+    <div class="top-actions"><button class="back-button" id="themeBack">← वापस</button></div>`;
+
+   main.querySelectorAll("[data-theme]").forEach(btn=>{
+    btn.onclick=async()=>{
+     const name=btn.dataset.theme;
+     applyTheme(name);
+     try{
+      await saveSetting("theme",name);
+      document.getElementById("themeStatus").textContent="आपकी थीम सेव हो गई।";
+      main.querySelectorAll("[data-theme]").forEach(b=>b.classList.toggle("selected",b===btn));
+     }catch(e){
+      document.getElementById("themeStatus").textContent="थीम सेव नहीं हुई: "+e.message;
+     }
+    };
+   });
+   document.getElementById("themeBack").onclick=showHome;
+  }
+
+  wallpaperInput.onchange=async function(){
+   const file=wallpaperInput.files[0];
+   if(!file)return;
+   if(!file.type.startsWith("image/")){
+    alert("कृपया फोटो चुनें।");wallpaperInput.value="";return;
    }
-
-   const pin=prompt("नया 6 अंकों का PIN डालें:");
-   if(!pin) return;
-
-   if(!/^[0-9]{6}$/.test(pin)){
-    showStatus("6 अंकों का PIN डालें।");
-    return;
-   }
-
-   const confirmPin=prompt("नया PIN दोबारा डालें:");
-   if(pin!==confirmPin){
-    showStatus("दोनों PIN अलग हैं।");
-    return;
-   }
-
    try{
-    const salt=crypto.getRandomValues(new Uint8Array(16));
-    const hashText=await makePinHash(pin,salt);
-
-    await setDoc(doc(db,"users",user.uid),{
-     pinSalt:bytesToBase64(salt),
-     pinHash:hashText
-    },{merge:true});
-
-    showStatus("नया PIN सफलतापूर्वक सेव हो गया।");
-   }catch(error){
-    showStatus("PIN Recovery Error: "+error.message);
+    await saveSetting("wallpaper",file);
+    const url=URL.createObjectURL(file);
+    objectUrls.push(url);
+    shell.style.backgroundImage=
+     "linear-gradient(#100b2040,#100b2060),url("+JSON.stringify(url)+")";
+    alert("आपका Wallpaper सेव हो गया।");
+   }catch(e){
+    alert("Wallpaper सेव नहीं हुआ: "+e.message);
    }
+   wallpaperInput.value="";
   };
 
-  loadMedia();
+  document.getElementById("photoBtn").onclick=()=>openGallery("image");
+  document.getElementById("videoBtn").onclick=()=>openGallery("video");
+  document.getElementById("themeBtn").onclick=showThemes;
+  document.getElementById("wallpaperBtn").onclick=()=>wallpaperInput.click();
+  document.getElementById("recoveryBtn").onclick=changePin;
+
+  function changePin(){
+   const user=auth.currentUser;
+   if(!user){alert("पहले मोबाइल OTP से लॉगिन करें।");return;}
+   const pin=prompt("नया 6 अंकों का PIN डालें:");
+   if(!pin)return;
+   if(!/^[0-9]{6}$/.test(pin)){alert("6 अंकों का PIN डालें।");return;}
+   const confirmPin=prompt("नया PIN दोबारा डालें:");
+   if(pin!==confirmPin){alert("दोनों PIN अलग हैं।");return;}
+
+   (async()=>{
+    try{
+     const salt=crypto.getRandomValues(new Uint8Array(16));
+     const hashText=await makePinHash(pin,salt);
+     await setDoc(doc(db,"users",user.uid),{
+      pinSalt:bytesToBase64(salt),pinHash:hashText
+     },{merge:true});
+     alert("नया PIN सफलतापूर्वक सेव हो गया।");
+    }catch(error){alert("PIN Recovery Error: "+error.message);}
+   })();
+  }
+
+  document.getElementById("homeButton").onclick=showHome;
  };
 
  vaultOpen.onerror=function(){
-  document.getElementById("vaultStatus").textContent=
-   "मोबाइल स्टोरेज शुरू नहीं हो पाया।";
+  const msg=document.getElementById("vaultStatus");
+  if(msg)msg.textContent="मोबाइल स्टोरेज शुरू नहीं हो पाया।";
  };
 }
 </script>
 </body>
 </html>
-
