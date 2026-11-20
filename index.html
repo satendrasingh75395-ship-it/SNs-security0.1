@@ -288,7 +288,7 @@ async function deriveWrapKey(code,salt){
 }
 async function getOrCreateVaultKey(){
  if(vaultKey)return vaultKey;
- const local=await getLocalSetting("vaultCryptoKey");if(local){vaultKey=local;return vaultKey;}
+const local=await getLocalSetting("vaultCryptoKey_"+currentUser.uid);if(local){vaultKey=local;return vaultKey;}
  const userRef=doc(db,"users",currentUser.uid),snap=await getDoc(userRef),data=snap.exists()?snap.data():{};
  if(data.vaultKeyWrap){
   const code=prompt("यह Cloud Vault पहले से बना है। अपना सुरक्षित Recovery Code डालें:");
