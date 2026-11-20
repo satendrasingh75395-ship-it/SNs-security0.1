@@ -314,5 +314,43 @@ async function encryptFile(file,key){
  return {cipher,iv:bytesToB64(iv)};
 }
 async function decryptFile(cipher,iv,key){
- return await cr
+ return await crypto.subtle.decrypt({name:"AES-GCM",iv:b64ToBytes(iv)},key,cipher);
+}
+$("backupBtn").onclick=async()=>{
+ try{
+  if(!currentUser)throw new Error("पहले Login करें।");
+  cloudSay("Cloud Backup चल रहा है…");const key=await getOrCreateVaultKey(),items=await mediaAll();
+  if(!items.length){cloudSay("Backup के लिए पहले Photo या Video Vault में फाइल जोड़ें।");return;}
+  let count=0;
+  for(const item of items){
+   if(item.cloudId)continue;
+   const file=item.file;if(!file)continue;
+   const enc=await encryptFile(file,key),id=makeId(),path=`users/${currentUser.uid}/backup/${id}.bin`;
+   await uploadBytes(ref(storage,path),enc.cipher,{contentType:"application/octet-stream"});
+   await addDoc(collection(db,"users",currentUser.uid,"backupFiles"),{id,path,name:item.name,type:item.type,mime:file.type||"application/octet-stream",iv:enc.iv,size:file.size,createdAt:Date.now()});
+   item.cloudId=id;const d=await openDB();await new Promise((res,rej)=>{const r=d.transaction("media","readwrite").objectStore("media").put(item);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});
+   count++;
+  }
+  cloudSay("Backup पूरा हुआ। नई अपलोड की गई फाइलें: "+count);
+ }catch(e){cloudSay("Backup Error: "+e.code+" "+e.message);}
+};
+$("restoreBtn").onclick=async()=>{
+ try{
+  if(!currentUser)throw new Error("पहले Login करें।");
+  cloudSay("Cloud Restore चल रहा है…");const key=await getOrCreateVaultKey();
+  const snap=await getDocs(collection(db,"users",currentUser.uid,"backupFiles")),local=await mediaAll();
+  const known=new Set(local.map(x=>x.cloudId).filter(Boolean));let count=0;
+  for(const d of snap.docs){
+   const meta=d.data();if(known.has(meta.id))continue;
+   const bytes=await getBytes(ref(storage,meta.path),500*1024*1024),plain=await decryptFile(bytes,meta.iv,key);
+   const blob=new Blob([plain],{type:meta.mime||"application/octet-stream"});
+   await mediaAdd({name:meta.name,type:meta.type,file:blob,ownerUid:currentUser.uid,createdAt:meta.createdAt||Date.now(),cloudId:meta.id});count++;
+  }
+  await loadMedia();cloudSay("Restore पूरा हुआ। नई फाइलें: "+count);
+ }catch(e){cloudSay("Restore Error: "+e.code+" "+e.message);}
+};
+$("logoutBtn").onclick=async()=>{await signOut(auth);vaultKey=null;};
+</script>
+</body>
+</html>
  
