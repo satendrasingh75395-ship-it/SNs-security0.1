@@ -352,6 +352,21 @@ $("restoreBtn").onclick=async()=>{
 };
 $("logoutBtn").onclick=async()=>{await signOut(auth);vaultKey=null;};
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(
+      "/SNs-security0.1/service-worker.js"
+    ).then((registration) => {
+      console.log("SNs Security Service Worker चालू है");
+    }).catch((error) => {
+      console.error("Service Worker Error:", error);
+    });
+  });
+}
+</script>
+
 </body>
 </html>
  
