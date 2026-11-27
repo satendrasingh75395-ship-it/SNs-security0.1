@@ -343,8 +343,23 @@ async function loadMedia(){
  filtered.sort((a,b)=>b.createdAt-a.createdAt).forEach(item=>{
   const row=document.createElement("div");row.className="item";
   const name=document.createElement("span");name.textContent=(item.type==="photo"?"📷 ":"🎥 ")+item.name;
-  const view=document.createElement("button");view.textContent="देखें";view.onclick=()=>openMedia(item);
-  row.append(name,view);list.appendChild(row);
+ const view = document.createElement("button");
+view.textContent = "देखें";
+view.onclick = () => openMedia(item);
+
+const remove = document.createElement("button");
+remove.textContent = "Remove";
+remove.className = "secondary";
+remove.onclick = () => removeToGallery(item);
+
+const del = document.createElement("button");
+del.textContent = "Delete";
+del.className = "danger";
+del.onclick = () => permanentDelete(item);
+
+row.append(name, view, remove, del);
+list.appendChild(row);
+  
  });
 }
 function openMedia(item){
