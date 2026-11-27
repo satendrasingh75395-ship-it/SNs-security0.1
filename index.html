@@ -91,7 +91,7 @@ a{color:#fff}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {getAuth,RecaptchaVerifier,signInWithPhoneNumber,onAuthStateChanged,reauthenticateWithPhoneNumber,EmailAuthProvider,linkWithCredential,linkWithRedirect,signInWithEmailAndPassword,GoogleAuthProvider,signInWithRedirect,signOut} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import {getStorage,ref,uploadBytes,getBytes,deleteObject} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-storage.js";
 
 const firebaseConfig={
