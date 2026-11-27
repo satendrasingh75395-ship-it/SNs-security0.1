@@ -335,33 +335,96 @@ async function mediaDelete(item) {
   });
 }
 
-// Gallery में वापस निकालना
-async function removeToGallery(item) {
-  try {
-    const url = URL.createObjectURL(item.file);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = item.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+async function loadMedia(){
+  const all = await mediaAll();
+  const filtered = mediaTypeFilter === "all"
+    ? all
+    : all.filter(x => x.type === mediaTypeFilter);
 
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  const list = $("#vaultList");
+  list.innerHTML = `<h3>आपकी फाइलें (${filtered.length})</h3>`;
 
-    const confirmSave = confirm(
-      "फाइल डाउनलोड शुरू हो गया है।\n\n" +
-      "क्या आपने फाइल डाउनलोड होते देख ली है?\n" +
-      "हाँ दबाने पर Vault और Cloud Backup से फाइल हटेगी।"
-    );
+  const filter = document.createElement("div");
+  filter.className = "filters";
 
-    if (!confirmSave) return;
+  ["all","photo","video"].forEach(t => {
+    const b = document.createElement("button");
+    b.className = "secondary";
+    b.textContent = t === "all" ? "सभी" : t === "photo" ? "फोटो" : "वीडियो";
+    b.onclick = () => {
+      mediaTypeFilter = t;
+      loadMedia();
+    };
+    filter.appendChild(b);
+  });
 
-    await mediaDelete(item);
-    await loadMedia();
-    cloudSay("फाइल Vault से हटा दी गई। डाउनलोड की गई फाइल Downloads में मिलेगी।");
-  } catch (e) {
-    alert("Remove Error: " + e.message);
+  list.appendChild(filter);
+
+  if (!filtered.length) {
+    list.insertAdjacentHTML("beforeend",
+      "<p>अभी कोई फोटो या वीडियो नहीं है।</p>");
+    return;
   }
+
+  const grid = document.createElement("div");
+  grid.className = "vault-grid";
+
+  filtered.sort((a,b) =>
+    (b.createdAt || 0) - (a.createdAt || 0)
+  ).forEach(item => {
+    const card = document.createElement("div");
+    card.className = "vault-card";
+
+    if (item.file) {
+      const url = URL.createObjectURL(item.file);
+      const preview = document.createElement(
+        item.type === "video" ? "video" : "img"
+      );
+
+      preview.src = url;
+
+      if (item.type === "video") {
+        preview.controls = true;
+        preview.playsInline = true;
+        preview.preload = "metadata";
+      } else {
+        preview.alt = item.name || "Photo";
+        preview.loading = "lazy";
+      }
+
+      preview.onclick = () => openMedia(item);
+      card.appendChild(preview);
+    }
+
+    const name = document.createElement("span");
+    name.className = "vault-name";
+    name.textContent = item.name || "फाइल";
+
+    const actions = document.createElement("div");
+    actions.className = "vault-actions";
+
+    const view = document.createElement("button");
+    view.textContent = "देखें";
+    view.className = "secondary";
+    view.onclick = () => openMedia(item);
+
+    const remove = document.createElement("button");
+    remove.textContent = "Remove";
+    remove.className = "secondary";
+    remove.onclick = () => removeToGallery(item);
+
+    const del = document.createElement("button");
+    del.textContent = "Delete";
+    del.className = "danger";
+    del.onclick = () => permanentDelete(item);
+
+    actions.append(view, remove, del);
+    card.append(name, actions);
+    grid.appendChild(card);
+  });
+
+  list.appendChild(grid);
+}
 }
 
 // हमेशा के लिए Delete करना
