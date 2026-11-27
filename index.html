@@ -243,6 +243,97 @@ $("videoBtn").onclick=()=>{$("videoFiles").click();};
 $("photoFiles").onchange=async e=>{try{await addFiles([...e.target.files],"photo");}catch(x){cloudSay("फाइल सेव नहीं हुई: "+x.message);}e.target.value="";};
 $("videoFiles").onchange=async e=>{try{await addFiles([...e.target.files],"video");}catch(x){cloudSay("फाइल सेव नहीं हुई: "+x.message);}e.target.value="";};
 
+async function mediaDelete(item) {
+  // Cloud Backup की कॉपी भी हटाएँ
+  if (item.cloudId && currentUser) {
+    const snap = await getDocs(
+      collection(db, "users", currentUser.uid, "backupFiles")
+    );
+
+    const match = snap.docs.find(
+      d => d.data().id === item.cloudId
+    );
+
+    if (match) {
+      const meta = match.data();
+
+      if (meta.path) {
+        try {
+          await deleteObject(ref(storage, meta.path));
+        } catch (e) {
+          if (e.code !== "storage/object-not-found") throw e;
+        }
+      }
+
+      await deleteDoc(
+        doc(db, "users", currentUser.uid, "backupFiles", match.id)
+      );
+    }
+  }
+
+  // मोबाइल के IndexedDB Vault से हटाएँ
+  const d = await openDB();
+
+  await new Promise((resolve, reject) => {
+    const tx = d.transaction("media", "readwrite");
+    tx.objectStore("media").delete(item.id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Gallery में वापस निकालना
+async function removeToGallery(item) {
+  try {
+    const url = URL.createObjectURL(item.file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = item.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+    const confirmSave = confirm(
+      "फाइल डाउनलोड शुरू हो गया है।\n\n" +
+      "क्या आपने फाइल डाउनलोड होते देख ली है?\n" +
+      "हाँ दबाने पर Vault और Cloud Backup से फाइल हटेगी।"
+    );
+
+    if (!confirmSave) return;
+
+    await mediaDelete(item);
+    await loadMedia();
+    cloudSay("फाइल Vault से हटा दी गई। डाउनलोड की गई फाइल Downloads में मिलेगी।");
+  } catch (e) {
+    alert("Remove Error: " + e.message);
+  }
+}
+
+// हमेशा के लिए Delete करना
+async function permanentDelete(item) {
+  const ok = confirm(
+    "चेतावनी!\n\n" +
+    item.name +
+    " को मोबाइल Vault और Cloud Backup से हमेशा के लिए हटाना है?\n\n" +
+    "यह वापस नहीं आएगी।"
+  );
+
+  if (!ok) return;
+
+  const ok2 = confirm("क्या आप पक्का Permanent Delete करना चाहते हैं?");
+  if (!ok2) return;
+
+  try {
+    await mediaDelete(item);
+    await loadMedia();
+    cloudSay("फाइल Permanent Delete हो गई।");
+  } catch (e) {
+    alert("Delete Error: " + e.message);
+  }
+}
+
 async function loadMedia(){
  const all=await mediaAll();const filtered=mediaTypeFilter==="all"?all:all.filter(x=>x.type===mediaTypeFilter);
  const list=$("vaultList");list.innerHTML="<h3>आपकी फाइलें ("+filtered.length+")</h3>";
