@@ -481,31 +481,141 @@ async function permanentDelete(item) {
   }
 }
 
-async function loadMedia(){
- const all=await mediaAll();const filtered=mediaTypeFilter==="all"?all:all.filter(x=>x.type===mediaTypeFilter);
- const list=$("vaultList");list.innerHTML="<h3>आपकी फाइलें ("+filtered.length+")</h3>";
- const filter=document.createElement("div");filter.className="grid";
- ["all","photo","video"].forEach(t=>{const b=document.createElement("button");b.className="secondary";b.textContent=t==="all"?"सभी":t==="photo"?"Photos":"Videos";b.onclick=()=>{mediaTypeFilter=t;loadMedia();};filter.appendChild(b);});list.appendChild(filter);
- if(!filtered.length){const p=document.createElement("p");p.className="muted";p.textContent="अभी कोई फाइल नहीं है।";list.appendChild(p);return;}
- filtered.sort((a,b)=>b.createdAt-a.createdAt).forEach(item=>{
-  const row=document.createElement("div");row.className="item";
-  const name=document.createElement("span");name.textContent=(item.type==="photo"?"📷 ":"🎥 ")+item.name;
- const view = document.createElement("button");
-view.textContent = "देखें";
-view.onclick = () => openMedia(item);
 
-const remove = document.createElement("button");
-remove.textContent = "Remove";
-remove.className = "secondary";
-remove.onclick = () => removeToGallery(item);
+let selectedVaultItems = new Map();
 
-const del = document.createElement("button");
-del.textContent = "Delete";
-del.className = "danger";
-del.onclick = () => permanentDelete(item);
+async function loadMedia() {
+  selectedVaultItems.clear();
 
-row.append(name, view, remove, del);
-list.appendChild(row);
+  const all = await mediaAll();
+  const filtered = mediaTypeFilter === "all"
+    ? all
+    : all.filter(x => x.type === mediaTypeFilter);
+
+  const list = $("#vaultList");
+  list.innerHTML = "";
+
+  const heading = document.createElement("h3");
+  heading.textContent = "आपकी फाइलें (" + filtered.length + ")";
+  list.appendChild(heading);
+
+  const filter = document.createElement("div");
+  filter.className = "filters";
+
+  ["all", "photo", "video"].forEach(t => {
+    const b = document.createElement("button");
+    b.className = "secondary";
+    b.textContent =
+      t === "all" ? "सभी" :
+      t === "photo" ? "फोटो" : "वीडियो";
+
+    b.onclick = () => {
+      mediaTypeFilter = t;
+      loadMedia();
+    };
+
+    filter.appendChild(b);
+  });
+
+  list.appendChild(filter);
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "vault-toolbar";
+  toolbar.hidden = true;
+
+  const count = document.createElement("span");
+  count.textContent = "0 चुनी गईं";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "Gallery में वापस";
+  removeBtn.className = "secondary";
+  removeBtn.onclick = removeSelectedFromGallery;
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Permanent Delete";
+  deleteBtn.className = "danger";
+  deleteBtn.onclick = permanentDeleteSelected;
+
+  toolbar.append(count, removeBtn, deleteBtn);
+  list.appendChild(toolbar);
+
+  function updateSelection() {
+    const n = selectedVaultItems.size;
+    toolbar.hidden = n === 0;
+    count.textContent = n + " फाइलें चुनी गईं";
+  }
+
+  if (!filtered.length) {
+    list.insertAdjacentHTML(
+      "beforeend",
+      "<p>अभी कोई फोटो या वीडियो नहीं है।</p>"
+    );
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "vault-grid";
+
+  filtered.sort(
+    (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
+  ).forEach(item => {
+    const card = document.createElement("div");
+    card.className = "vault-card";
+
+    if (item.file) {
+      const url = URL.createObjectURL(item.file);
+
+      const preview = document.createElement(
+        item.type === "video" ? "video" : "img"
+      );
+
+      preview.src = url;
+
+      if (item.type === "video") {
+        preview.controls = true;
+        preview.playsInline = true;
+        preview.preload = "metadata";
+      } else {
+        preview.alt = item.name || "Photo";
+        preview.loading = "lazy";
+      }
+
+      preview.onclick = () => openMedia(item);
+      card.appendChild(preview);
+    }
+
+    const name = document.createElement("span");
+    name.className = "vault-name";
+    name.textContent = item.name || "फाइल";
+
+    const checkLabel = document.createElement("label");
+    checkLabel.className = "vault-check";
+
+    const check = document.createElement("input");
+    check.type = "checkbox";
+
+    check.onchange = () => {
+      if (check.checked) {
+        selectedVaultItems.set(item.id, item);
+        card.classList.add("selected");
+      } else {
+        selectedVaultItems.delete(item.id);
+        card.classList.remove("selected");
+      }
+
+      updateSelection();
+    };
+
+    const checkText = document.createElement("span");
+    checkText.textContent = "चुनें";
+
+    checkLabel.append(check, checkText);
+    card.append(name, checkLabel);
+    grid.appendChild(card);
+  });
+
+  list.appendChild(grid);
+}
   
  });
 }
