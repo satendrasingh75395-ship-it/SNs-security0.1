@@ -484,6 +484,76 @@ async function permanentDelete(item) {
 
 let selectedVaultItems = new Map();
 
+async function removeSelectedFromGallery() {
+  const items = [...selectedVaultItems.values()];
+  if (!items.length) return;
+
+  if (items.some(item => !item.file)) {
+    alert("कुछ फाइलें डाउनलोड के लिए उपलब्ध नहीं हैं।");
+    return;
+  }
+
+  try {
+    for (const item of items) {
+      const url = URL.createObjectURL(item.file);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = item.name || "SNS-Photo";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+
+    const ok = confirm(
+      items.length + " फाइलें डाउनलोड शुरू हुई हैं।\n\n" +
+      "क्या आपने डाउनलोड की गई फाइलें देख ली हैं?\n" +
+      "हाँ दबाने पर ये Vault और Cloud Backup से हटेंगी।"
+    );
+
+    if (!ok) return;
+
+    for (const item of items) {
+      await mediaDelete(item);
+    }
+
+    selectedVaultItems.clear();
+    await loadMedia();
+    cloudSay("चुनी गई फाइलें Vault से हटा दी गईं। Downloads में मिलेंगी।");
+
+  } catch (e) {
+    alert("Remove Error: " + e.message);
+  }
+}
+
+async function permanentDeleteSelected() {
+  const items = [...selectedVaultItems.values()];
+  if (!items.length) return;
+
+  const names = items.map(x => x.name || "फाइल").join("\n");
+
+  const ok = confirm(
+    "चेतावनी! ये फाइलें हमेशा के लिए हटेंगी:\n\n" +
+    names +
+    "\n\nमोबाइल Vault और Cloud Backup दोनों से हटाना है?"
+  );
+
+  if (!ok) return;
+
+  try {
+    for (const item of items) {
+      await mediaDelete(item);
+    }
+
+    selectedVaultItems.clear();
+    await loadMedia();
+    cloudSay("चुनी गई फाइलें Permanent Delete हो गईं।");
+
+  } catch (e) {
+    alert("Delete Error: " + e.message);
+  }
+}
+
 async function loadMedia() {
   selectedVaultItems.clear();
 
